@@ -1,0 +1,73 @@
+enable
+configure terminal
+hostname R3
+no ip domain-lookup
+enable secret class
+service password-encryption
+banner motd # ACCES STRICTEMENT RESERVE AUX ADMINISTRATEURS AUTORISES #
+ip domain-name ccna-security.local
+username admin privilege 15 secret Admin2026!
+ip access-list standard ADMIN-VTY
+ permit 172.18.50.0 0.0.0.255
+ deny any
+exit
+crypto key generate rsa modulus 1024
+ip ssh version 2
+line console 0
+ password cisco
+ login
+ logging synchronous
+exit
+line vty 0 4
+ login local
+ transport input ssh
+ access-class ADMIN-VTY in
+exit
+interface GigabitEthernet0/1
+ no ip address
+ no shutdown
+exit
+interface GigabitEthernet0/1.30
+ encapsulation dot1Q 30
+ ip address 172.18.48.254 255.255.255.0
+ no shutdown
+exit
+interface GigabitEthernet0/1.60
+ encapsulation dot1Q 60
+ ip address 172.18.49.254 255.255.255.0
+ no shutdown
+exit
+interface GigabitEthernet0/1.99
+ encapsulation dot1Q 99 native
+ ip address 172.18.50.254 255.255.255.0
+ no shutdown
+exit
+interface Serial0/3/0
+ description WAN vers R2 - DCE
+ ip address 10.0.0.1 255.255.255.252
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 CCNAsecurity2026
+ clock rate 64000
+ no shutdown
+exit
+interface Serial0/3/1
+ description WAN vers R1 - DCE
+ ip address 10.0.0.10 255.255.255.252
+ ip ospf authentication message-digest
+ ip ospf message-digest-key 1 md5 CCNAsecurity2026
+ clock rate 64000
+ no shutdown
+exit
+router ospf 1
+ router-id 3.3.3.3
+ area 0 authentication message-digest
+ passive-interface default
+ no passive-interface Serial0/3/0
+ no passive-interface Serial0/3/1
+ network 10.0.0.0 0.0.0.3 area 0
+ network 10.0.0.8 0.0.0.3 area 0
+ network 172.18.48.0 0.0.0.255 area 0
+ network 172.18.49.0 0.0.0.255 area 0
+exit
+end
+write memory

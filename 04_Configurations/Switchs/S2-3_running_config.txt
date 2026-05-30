@@ -1,0 +1,82 @@
+enable
+configure terminal
+hostname S2-3
+no ip domain-lookup
+enable secret class
+service password-encryption
+banner motd # ACCES STRICTEMENT RESERVE AUX ADMINISTRATEURS AUTORISES #
+ip domain-name ccna-security.local
+username admin privilege 15 secret Admin2026!
+
+vlan 30
+ name ETUDIANTS_30
+vlan 60
+ name ENSEIGNANTS_60
+vlan 99
+ name ADMIN_NATIVE
+vlan 999
+ name PARKING_UNUSED
+exit
+
+interface vlan 99
+ ip address 172.18.50.252 255.255.255.0
+ no shutdown
+exit
+ip default-gateway 172.18.50.254
+
+ip access-list standard ADMIN-VTY
+ permit 172.18.50.0 0.0.0.255
+ deny any
+exit
+
+crypto key generate rsa modulus 1024
+ip ssh version 2
+
+line console 0
+ password cisco
+ login
+ logging synchronous
+exit
+line vty 0 4
+ login local
+ transport input ssh
+ access-class ADMIN-VTY in
+exit
+
+interface GigabitEthernet0/1
+ description TRUNK_VERS_S1
+ switchport mode trunk
+ switchport trunk native vlan 99
+ switchport trunk allowed vlan 30,60,99
+ switchport nonegotiate
+ no shutdown
+exit
+
+interface GigabitEthernet0/2
+ description PORT_INUTILISE
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+exit
+
+interface range FastEthernet0/1 - 12
+ description PORTS_INUTILISES
+ switchport mode access
+ switchport access vlan 999
+ shutdown
+exit
+
+interface range FastEthernet0/13 - 24
+ description PORTS_ENSEIGNANTS
+ switchport mode access
+ switchport access vlan 60
+ spanning-tree portfast
+ switchport port-security
+ switchport port-security maximum 2
+ switchport port-security violation restrict
+ switchport port-security mac-address sticky
+ no shutdown
+exit
+
+end
+write memory
