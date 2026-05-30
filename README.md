@@ -12,3 +12,8 @@ Ce dossier est prêt pour le rendu.
 - `06_Preuve_Tests` : matrice de flux, matrice d'exigences et commandes de validation.
 - `07_Annexes` : informations complémentaires.
 
+
+## Remarque sécurité
+
+> Les identifiants présents dans les configurations sont fictifs et utilisés uniquement dans un contexte de laboratoire Packet Tracer. Ils ne doivent pas être utilisés en production.
+
